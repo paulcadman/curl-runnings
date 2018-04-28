@@ -10,7 +10,11 @@ module Testing.CurlRunnings
     , decodeFile
     ) where
 
+import qualified Control.Exception
+import Control.Arrow
 import           Control.Monad
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Except
 import           Data.Aeson
 import           Data.Aeson.Types
 import qualified Data.ByteString.Char8                as B8S
@@ -22,8 +26,15 @@ import           Data.List
 import           Data.Maybe
 import           Data.Monoid
 import qualified Data.Text                            as T
+import qualified Data.Text.IO                         as TIO
+import qualified Data.Text.Lazy                       as TL
 import qualified Data.Vector                          as V
 import qualified Data.Yaml                            as Y
+import qualified Dhall
+import qualified Dhall.Import
+import qualified Dhall.JSON
+import qualified Dhall.Parser
+import qualified Dhall.TypeCheck
 import           Network.HTTP.Conduit
 import           Network.HTTP.Simple
 import qualified Network.HTTP.Types.Header            as HTTP
@@ -33,20 +44,46 @@ import           Testing.CurlRunnings.Internal
 import           Testing.CurlRunnings.Internal.Parser
 import           Testing.CurlRunnings.Types
 import           Text.Printf
+import           Text.Trifecta.Delta                  (Delta (..))
 
--- | decode a json or yaml file into a suite object
+-- | decode a json, yaml, or dhall file into a suite object
 decodeFile :: FilePath -> IO (Either String CurlSuite)
-decodeFile specPath = doesFileExist specPath >>= \exists ->
-  if exists then
-    case last $ T.splitOn "." (T.pack specPath) of
-      "json" ->
-        eitherDecode' <$> B.readFile specPath :: IO (Either String CurlSuite)
-      "yaml" ->
-        Y.decodeEither <$> B8S.readFile specPath :: IO (Either String CurlSuite)
-      "yml" ->
-        Y.decodeEither <$> B8S.readFile specPath :: IO (Either String CurlSuite)
-      _ -> return . Left $ printf "Invalid spec path %s" specPath
-  else return . Left $ printf "%s not found" specPath
+decodeFile specPath =
+  doesFileExist specPath >>= \exists ->
+    if exists
+      then case last $ T.splitOn "." (T.pack specPath) of
+             "json" ->
+               eitherDecode' <$> B.readFile specPath :: IO (Either String CurlSuite)
+             "yaml" ->
+               Y.decodeEither <$> B8S.readFile specPath :: IO (Either String CurlSuite)
+             "yml" ->
+               Y.decodeEither <$> B8S.readFile specPath :: IO (Either String CurlSuite)
+             "dhall" ->
+               runExceptT $ do
+                 let showErrorWithMessage :: (Show a) => String -> a -> String
+                     showErrorWithMessage m = show . tracer m
+                 expr <-
+                   withExceptT (showErrorWithMessage "expr") . ExceptT . return $
+                   Dhall.Parser.exprFromText
+                     (Directed "(stdin)" 0 0 0 0)
+                     (TL.pack specPath)
+                 expr' <- liftIO $ Dhall.Import.load expr
+                 ExceptT $
+                   return $ do
+                     _ <-
+                       left (showErrorWithMessage "typeof") $
+                       Dhall.TypeCheck.typeOf expr'
+                     val <-
+                       left (showErrorWithMessage "to json") $
+                       Dhall.JSON.dhallToJSON expr'
+                     left (showErrorWithMessage "from json") . resultToEither $
+                       fromJSON val
+             _ -> return . Left $ printf "Invalid spec path %s" specPath
+      else return . Left $ printf "%s not found" specPath
+
+resultToEither :: Result a -> Either String a
+resultToEither (Error s) = Left s
+resultToEither (Success a) = Right a
 
 -- | Run a single test case, and returns the result. IO is needed here since this method is responsible
 -- for actually curling the test case endpoint and parsing the result.

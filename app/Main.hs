@@ -40,7 +40,7 @@ runFile path = do
             then putStrLn (makeRed "Some tests failed") >>
                  exitWith (ExitFailure 1)
             else putStrLn $ makeGreen "All tests passed!"
-        Left messgage -> putStrLn . makeRed $ "Couldn't read input json or yaml file: " ++ messgage
+        Left messgage -> putStrLn . makeRed $ "Couldn't read input file: " ++ messgage
 
 main :: IO ()
 main = cmdArgs argParser >>= runFile . file
