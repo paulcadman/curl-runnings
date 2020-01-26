@@ -3,11 +3,12 @@
 module Main where
 
 import           Data.Either
-import qualified Data.Text                            as T
+import qualified Data.Text                                  as T
 import           System.Directory
 import           Test.Hspec
 import           Testing.CurlRunnings
 import           Testing.CurlRunnings.Internal
+import           Testing.CurlRunnings.Internal.HeaderParser
 import           Testing.CurlRunnings.Internal.Parser
 import           Testing.CurlRunnings.Types
 
