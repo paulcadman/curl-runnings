@@ -97,7 +97,7 @@ isNotContains _               = False
 data Header =
   Header T.Text
          T.Text
-  deriving (Show, Generic)
+  deriving (Show, Generic, Eq)
 
 instance ToJSON Header
 
@@ -105,7 +105,7 @@ instance ToJSON Header
 -- fromJSON
 data Headers =
   HeaderSet [Header]
-  deriving (Show, Generic)
+  deriving (Show, Generic, Eq)
 
 instance ToJSON Headers
 

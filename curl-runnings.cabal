@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c5eff7acb49843acbacdcf64e3e57fd05242eee41e466f2468cc9bf696b5f666
+-- hash: ba4b78891af638b22fe0283a4f69a298688609e73aac4da47e04477f94e09a8d
 
 name:           curl-runnings
 version:        0.11.1
@@ -94,4 +94,5 @@ test-suite curl-runnings-test
     , directory >=1.3.0.2
     , hspec >=2.4.4
     , hspec-expectations >=0.8.2
+    , text >=1.2.2.2
   default-language: Haskell2010
