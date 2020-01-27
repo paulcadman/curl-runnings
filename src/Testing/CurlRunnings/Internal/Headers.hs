@@ -29,11 +29,11 @@ module Testing.CurlRunnings.Internal.Headers
     , parseHeaders
     ) where
 
-import Data.Functor (void)
 import           Data.Aeson
 import           Data.Aeson.Types           hiding (Parser)
 import           Data.Bifunctor             (Bifunctor (..))
 import           Data.Char                  (isAscii, isSpace)
+import           Data.Functor               (void)
 import qualified Data.Text                  as T
 import           Data.Void
 import           GHC.Generics
