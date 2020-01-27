@@ -24,7 +24,7 @@ library:
   - Testing.CurlRunnings.Types
   - Testing.CurlRunnings.Internal
   - Testing.CurlRunnings.Internal.Parser
-  - Testing.CurlRunnings.Internal.HeaderParser
+  - Testing.CurlRunnings.Internal.Headers
   dependencies:
   - aeson >=1.2.4.0
   - bytestring >=0.10.8.2
