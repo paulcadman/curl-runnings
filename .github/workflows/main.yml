@@ -32,4 +32,4 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: work
-        path: .stack-work
+        path: .stack-work/install
