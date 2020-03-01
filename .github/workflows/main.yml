@@ -1,0 +1,26 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set environment variables
+      run: |
+        echo "::set-env name=STACK_ROOT::$HOME/sr"
+    - name: install stack
+      run: |
+        choco install haskell-stack
+    - name: Cache stack root
+      id: cache-stack-1
+      uses: actions/cache@v1
+      with:
+        path: $STACK_ROOT
+        key: stack-root-1
+    - name: Build CurlRunnings
+      run: |
+        stack build
