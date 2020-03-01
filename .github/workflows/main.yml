@@ -16,6 +16,12 @@ jobs:
     - name: install stack
       run: |
         choco install haskell-stack
+    - name: cache stack
+      id: cache-stack-ghc-1
+      uses: actions/cache@v1
+      with:
+        path: $HOME/AppData/Local/Programs/stack
+        key: cache-stack-ghc-key-1
     - name: Cache stack root
       id: cache-stack-3
       uses: actions/cache@v1
