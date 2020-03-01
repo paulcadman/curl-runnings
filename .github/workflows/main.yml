@@ -9,10 +9,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set environment variables
-      run: |
-        echo "$GITHUB_WORKSPACE"
-        echo "::set-env name=STACK_ROOT::$GITHUB_WORKSPACE/sr"
+#     - name: Set environment variables
+#       run: |
+#         echo "$GITHUB_WORKSPACE"
+#         echo "::set-env name=STACK_ROOT::$GITHUB_WORKSPACE/sr"
     - name: install stack
       run: |
         choco install haskell-stack
@@ -23,6 +23,8 @@ jobs:
         path: sr
         key: stack-root-3
     - name: Build CurlRunnings
+      env:
+        STACK_ROOT: ${{ github.workspace }}/sr
       run: |
         stack build
         stack install
