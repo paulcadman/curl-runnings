@@ -11,6 +11,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Set environment variables
       run: |
+        echo "$GITHUB_WORKSPACE"
         echo "::set-env name=STACK_ROOT::$GITHUB_WORKSPACE/sr"
     - name: install stack
       run: |
