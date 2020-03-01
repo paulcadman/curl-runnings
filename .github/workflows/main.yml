@@ -11,16 +11,22 @@ jobs:
     - uses: actions/checkout@v2
     - name: Set environment variables
       run: |
-        echo "::set-env name=STACK_ROOT::$HOME/sr"
+        echo "::set-env name=STACK_ROOT::$GITHUB_WORKSPACE/sr"
     - name: install stack
       run: |
         choco install haskell-stack
     - name: Cache stack root
-      id: cache-stack-1
+      id: cache-stack-3
       uses: actions/cache@v1
       with:
-        path: $STACK_ROOT
-        key: stack-root-1
+        path: sr
+        key: stack-root-3
     - name: Build CurlRunnings
       run: |
         stack build
+        stack install
+    - name: store binary
+      uses: actions/upload-artifact@v1
+      with:
+        name: work
+        path: .stack-work
