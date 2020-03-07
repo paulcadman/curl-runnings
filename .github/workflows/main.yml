@@ -16,12 +16,6 @@ jobs:
     - name: install stack
       run: |
         choco install haskell-stack
-    - name: cache stack
-      id: cache-stack-ghc-2
-      uses: actions/cache@v1
-      with:
-        path: ~/AppData/Local/Programs/stack
-        key: cache-stack-ghc-key-2
     - name: Cache stack root
       id: cache-stack-3
       uses: actions/cache@v1
@@ -32,7 +26,7 @@ jobs:
       env:
         STACK_ROOT: ${{ github.workspace }}/sr
       run: |
-        stack install --local-build-path ${{ github.workspace }}
+        stack install
     - name: store binary
       uses: actions/upload-artifact@v1
       with:
