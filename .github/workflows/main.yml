@@ -32,10 +32,9 @@ jobs:
       env:
         STACK_ROOT: ${{ github.workspace }}/sr
       run: |
-        stack build
-        stack install
+        stack install --local-build-path ${{ github.workspace }}
     - name: store binary
       uses: actions/upload-artifact@v1
       with:
-        name: work
-        path: .stack-work/install
+        name: output
+        path: ${{ github.workspace }}/curl-runnings
