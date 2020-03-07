@@ -13,6 +13,12 @@ jobs:
 #       run: |
 #         echo "$GITHUB_WORKSPACE"
 #         echo "::set-env name=STACK_ROOT::$GITHUB_WORKSPACE/sr"
+    - name: cache stack
+      id: cache-stack-ghc-2
+      uses: actions/cache@v1
+      with:
+        path: ~/AppData/Local/Programs/stack
+        key: cache-stack-ghc-key-2
     - name: install stack
       run: |
         choco install haskell-stack
@@ -26,8 +32,8 @@ jobs:
       env:
         STACK_ROOT: ${{ github.workspace }}/sr
       run: |
-        stack install
         stack path --local-bin
+        stack install
     - name: store binary
       uses: actions/upload-artifact@v1
       with:
