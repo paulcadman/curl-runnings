@@ -27,6 +27,7 @@ jobs:
         STACK_ROOT: ${{ github.workspace }}/sr
       run: |
         stack install
+        stack path --local-bin
     - name: store binary
       uses: actions/upload-artifact@v1
       with:
