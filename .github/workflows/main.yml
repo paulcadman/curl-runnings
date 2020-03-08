@@ -78,7 +78,12 @@ jobs:
       run: |
         stack install
 
-    - name: Move binary into place
+    - name: Move binary into place (Windows)
+      run: |
+        $install_path = stack path --local-bin
+        mkdir ${{ github.workspace }}/output-windows
+        mv $install_path/${{ matrix.artifact_name }} ${{ github.workspace }}/output
+    - name: Move binary into place (Linux)
       run: |
         export install_path=`stack path --local-bin`
         mkdir ${{ github.workspace }}/output-windows
