@@ -33,6 +33,7 @@ jobs:
   build:
     strategy:
       matrix:
+        os: [windows-latest, ubuntu-latest]
         include:
           - os: windows-latest
             artifact_name: curl-runnings.exe
