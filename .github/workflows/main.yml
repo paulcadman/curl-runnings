@@ -33,12 +33,11 @@ jobs:
         STACK_ROOT: ${{ github.workspace }}/sr
       run: |
         $install_path = stack path --local-bin
-        echo ::set-env install_path=$install_path/curl-runnings.exe
         stack install
         new-item ${{ github.workspace }}/output -itemtype directory
         move-item $install_path/curl-runnings.exe ${{ github.workspace }}/output 
     - name: store binary
       uses: actions/upload-artifact@v1
       with:
-        name: output
+        name: curl-runnings.exe
         path: ${{ github.workspace }}/output/curl-runnings.exe
