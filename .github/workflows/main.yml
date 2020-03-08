@@ -32,6 +32,8 @@ jobs:
       env:
         STACK_ROOT: ${{ github.workspace }}/sr
       run: |
+        echo $env.ChocolateyToolsRoot
+        echo $env.ChocolateyBinRoot
         $install_path = stack path --local-bin
         stack install
         new-item ${{ github.workspace }}/output -itemtype directory
