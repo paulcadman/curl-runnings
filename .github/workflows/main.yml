@@ -6,36 +6,9 @@ on:
     - 'v*'
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        os: [windows-latest]
-    runs-on: ${{ matrix.os }}
+  create-release:
+    runs-on: [ubuntu-latest]
     steps:
-    - uses: actions/checkout@v2
-    - name: cache stack
-      id: cache-stack-ghc-2
-      uses: actions/cache@v1
-      with:
-        path: ~/AppData/Local/Programs/stack
-        key: cache-stack-ghc-key-2
-    - name: install stack
-      run: |
-        choco install haskell-stack
-    - name: Cache stack root
-      id: cache-stack-3
-      uses: actions/cache@v1
-      with:
-        path: sr
-        key: stack-root-3
-    - name: Build CurlRunnings
-      env:
-        STACK_ROOT: ${{ github.workspace }}/sr
-      run: |
-        $install_path = stack path --local-bin
-        stack install
-        new-item ${{ github.workspace }}/output -itemtype directory
-        move-item $install_path/curl-runnings.exe ${{ github.workspace }}/output
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -49,13 +22,94 @@ jobs:
           - First Change
         draft: false
         prerelease: false
+    - name: Output Release URL File
+      run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
+    - name: Save Release URL File for publish
+      uses: actions/upload-artifact@v1
+      with:
+        name: release_url
+        path: release_url.txt
+     
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: curl-runnings.exe
+            asset_name: curl-runnings-windows.exe
+          - os: ubuntu-latest
+            artifact_name: curl-runnings
+            asset_name: curl-runnings-linux
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: cache stack
+      id: cache-stack-ghc-2
+      uses: actions/cache@v1
+      with:
+        path: ~/AppData/Local/Programs/stack
+        key: cache-stack-ghc-key-2
+
+    - name: install stack (Windows)
+      run: |
+        choco install haskell-stack
+      if: matrix.os == 'windows-latest'
+    - name: install stack (Linux)
+      run: |
+        sudo apt-get install stack
+      if: matrix.os == 'ubuntu-latest'
+
+    - name: Cache stack root (Windows)
+      if: matrix.os == 'windows-latest'
+      id: cache-stack-3
+      uses: actions/cache@v1
+      with:
+        path: sr
+        key: stack-root-3
+    - name: Cache stack root (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      id: cache-stack-1-linux
+      uses: actions/cache@v1
+      with:
+        path: sr
+        key: stack-root-1-linux
+
+    - name: Build CurlRunnings
+      env:
+        STACK_ROOT: ${{ github.workspace }}/sr
+      run: |
+        stack install
+
+    - name: Move binary into place (Windows)
+      run: |
+        $install_path = stack path --local-bin
+        new-item ${{ github.workspace }}/output -itemtype directory
+        move-item $install_path/curl-runnings.exe ${{ github.workspace }}/output
+      if: matrix.os == 'windows-latest'
+    - name: Move binary into place (Linux)
+      run: |
+        export install_path=`stack path --local-bin`
+        mkdir ${{ github.workspace }}/output-windows
+        mv $install_path/curl-runnings.exe ${{ github.workspace }}/output
+      if: matrix.os == 'ubuntu-latest'
+
+    - name: Load Release URL File from Create Release job
+      uses: actions/download-artifact@v1
+      with:
+        name: release_url
+    - name: Get Release File Name & Upload URL
+      id: get_release_info
+      run: |
+        value=`cat release_url/release_url.txt`
+        echo ::set-output name=upload_url::$value
+
     - name: Upload Release Asset
-      id: upload_release_asset
+      id: upload_release_asset-windows
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ github.workspace }}/output/curl-runnings.exe
-        asset_name: curl-runnings.exe
-        asset_content_type: application/octet-stream 
+        upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/output/${{ matrix.artifact_name }}
+        asset_name: ${{ matrix.asset_name }}
+        asset_content_type: application/octet-stream
