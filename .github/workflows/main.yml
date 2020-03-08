@@ -57,7 +57,7 @@ jobs:
       if: matrix.os == 'windows-latest'
     - name: install stack (Linux)
       run: |
-        sudo apt-get install stack
+        sudo apt-get install haskell-stack
       if: matrix.os == 'ubuntu-latest'
 
     - name: Cache stack root (Windows)
