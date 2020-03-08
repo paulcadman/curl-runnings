@@ -83,7 +83,9 @@ jobs:
         $install_path = stack path --local-bin
         mkdir ${{ github.workspace }}/output-windows
         mv $install_path/${{ matrix.artifact_name }} ${{ github.workspace }}/output
+      if: matrix.os == 'windows-latest'
     - name: Move binary into place (Linux)
+      if: matrix.os == 'ubuntu-latest'
       run: |
         export install_path=`stack path --local-bin`
         mkdir ${{ github.workspace }}/output-windows
