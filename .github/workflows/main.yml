@@ -81,7 +81,7 @@ jobs:
     - name: Move binary into place (Windows)
       run: |
         $install_path = stack path --local-bin
-        mkdir ${{ github.workspace }}/output-windows
+        mkdir ${{ github.workspace }}/output
         mv $install_path/${{ matrix.artifact_name }} ${{ github.workspace }}/output
       if: matrix.os == 'windows-latest'
     - name: Move binary into place (Linux)
