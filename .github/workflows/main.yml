@@ -1,18 +1,15 @@
-name: Windows Build
+name: Release
 
-on: [push]
+on:
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   build:
-
     runs-on: windows-latest
-
     steps:
     - uses: actions/checkout@v2
-#     - name: Set environment variables
-#       run: |
-#         echo "$GITHUB_WORKSPACE"
-#         echo "::set-env name=STACK_ROOT::$GITHUB_WORKSPACE/sr"
     - name: cache stack
       id: cache-stack-ghc-2
       uses: actions/cache@v1
@@ -32,15 +29,30 @@ jobs:
       env:
         STACK_ROOT: ${{ github.workspace }}/sr
       run: |
-        echo $env.LOCALAPPDATA
-        echo $env.TEMP
-        echo $LOCALAPPDATA
         $install_path = stack path --local-bin
         stack install
         new-item ${{ github.workspace }}/output -itemtype directory
-        move-item $install_path/curl-runnings.exe ${{ github.workspace }}/output 
-    - name: store binary
-      uses: actions/upload-artifact@v1
+        move-item $install_path/curl-runnings.exe ${{ github.workspace }}/output
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        name: curl-runnings.exe
-        path: ${{ github.workspace }}/output/curl-runnings.exe
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          Changes in this Release
+          - First Change
+        draft: false
+        prerelease: false
+    - name: Upload Release Asset
+      id: upload_release_asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/output/curl-runnings.exe
+        asset_name: curl-runnings.exe
+        asset_content_type: application/octet-stream 
