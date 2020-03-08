@@ -7,7 +7,10 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
     - name: cache stack
